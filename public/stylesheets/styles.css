@@ -1,0 +1,32 @@
+.container {
+    display: flex;
+}
+
+.column {
+    flex: 3;
+    padding: 10px;
+}
+
+.canvas-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#myChart {
+    position: absolute;
+    top: 10%; /* Center the chart */
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    z-index: 1;
+}
+
+#myLogo {
+    position: absolute;
+    top: 0; /* Position the logo in the top right corner */
+    right: 0;
+    width: 20%;
+    height: 20%;
+    z-index: 2;
+}

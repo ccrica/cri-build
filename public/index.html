@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Test de dev</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        window.onload = function() {
+            showTimes();
+            fetchDbCri();
+            handleFormSubmit();
+        }
+
+        function showTimes() {
+            const userTime = new Date();
+            document.getElementById('userTime').textContent = userTime.toISOString();
+            fetch('/time')
+                .then(response => response.text())
+                .then(serverTime => {
+                    document.getElementById('serverTime').textContent = serverTime;
+                    const diff = new Date(serverTime).getTime() - userTime.getTime();
+                    document.getElementById('diff').textContent = diff + ' milliseconds';
+                });
+        }
+
+        function fetchDbCri() {
+            fetch('/db_cri')
+                .then(response => response.text())
+                .then(db_cri => {
+                    document.getElementById('db_cri').textContent = db_cri;
+                });
+        }
+
+        function handleFormSubmit() {
+            document.getElementById('submitForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                const name = document.getElementById('name').value;
+
+                fetch('/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `name=${encodeURIComponent(name)}`,
+                })
+                .then(() => fetch(`/response_data?name=${encodeURIComponent(name)}`))
+                .then(response => response.json())
+                .then(data => {
+                    // Access the first element of the array
+                    const firstElement = data[0];
+
+                    // Create a structured view of the data
+                    const dataContainer = document.getElementById('dbData');
+                    dataContainer.innerHTML = `
+                        <p>Submit Date: ${firstElement.submitdate}</p>
+                        <p>Email: ${firstElement.email}</p>
+                    `;
+                    document.getElementById('responseReceived').textContent = "Response received";
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1 id="db_cri"></h1>
+    <p>User time: <span id="userTime"></span></p>
+    <p>Server time: <span id="serverTime"></span></p>
+    <p>Difference: <span id="diff"></span></p>
+    <form id="submitForm" action="/submit" method="post">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name"><br>
+        <input type="submit" value="Submit">
+    </form>
+    <div id="dbData"></div>
+    <p id="responseReceived"></p>
+</body>
+</html>

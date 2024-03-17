@@ -7,11 +7,13 @@ const sqlite3 = require('sqlite3').verbose();
 const mariadb = require('mariadb');
 const bodyParser = require('body-parser');
 const path = require('path');
+const app = express();
 
-const PORT = process.env.PORT || 3717;
-const IP = process.env.IP || '0.0.0.0';
+const PORT = process.env.PORT;
+const IP = process.env.IP;
 
 console.log("DB_CRI:", process.env.DB_CRI);
+app.use('/js', express.static(path.join(__dirname, './scripts')));
 
 const result = require('dotenv').config({ path: '/var_env/ls/.env.txt' });
 if (result.error) {

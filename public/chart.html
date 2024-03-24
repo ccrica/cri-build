@@ -5,21 +5,31 @@
     <title>Polar Area Chart</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="./stylesheets/styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="./javascripts/chart1.js"></script>
+    <script src="./javascripts/chart3.js"></script>
+    <script src="./javascripts/chart2.js"></script>
     <div class="container">
         <div class="column">
-            <div class="canvas-container">
+            <h1>Ciao Belli !</h1>
+            <!--div class="canvas-container"-->
                 <canvas id="myChart"></canvas>
-                <canvas id="myLogo"></canvas>
                 <!--img id="logo" src="./images/logo.png" alt="Logo"-->
-            </div>
+            <!--/div-->
         </div>
         <div class="column">
-            <!-- Content for the second column goes here -->
+        <h1>Great deal !</h1>
+                <canvas id="myBars"></canvas>
+        </div>
+        <div class="column">
+        <h1>Belle semaine</h1>
+                <canvas id="myRadarChart"></canvas>
         </div>
     </div>
-    <script src="./javascripts/chart1.js"></script>
+
 </body>
 </html>

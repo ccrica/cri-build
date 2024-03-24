@@ -1,43 +1,41 @@
-// server.js
+/**
+ * CRI - 2024
+ * Import des des modules
+ */
+import express from 'express';
+import fs from 'fs';
+import sqlite3 from 'sqlite3';
+import mariadb from 'mariadb';
+import bodyParser from 'body-parser';
+import path from 'path';
 
-require('dotenv').config({ path: '/var_env/ls/.env.txt' });
-const express = require('express');
-const fs = require('fs');
-const sqlite3 = require('sqlite3').verbose();
-const mariadb = require('mariadb');
-const bodyParser = require('body-parser');
-const path = require('path');
+/**
+ * initialisation des variables d'environnement + Express + IP et Port
+ */
+const result = dotenv.config({ path: '/var_env/ls/.env.txt' });
+    if (result.error) {throw result.error;}
 const app = express();
-
 const PORT = process.env.PORT;
 const IP = process.env.IP;
-
-console.log("DB_CRI:", process.env.DB_CRI);
+/**
+ * utilisation de scripts en dehors du répertoire public et logguer certaines actions
+ */
 app.use('/js', express.static(path.join(__dirname, './scripts')));
-
-const result = require('dotenv').config({ path: '/var_env/ls/.env.txt' });
-if (result.error) {
-    throw result.error;
-}
-
-
-
 const logStream = fs.createWriteStream('./logs/server.log', { flags: 'a' });
 function log(message) {
     const timestamp = new Date().toISOString();
     const logMessage = `${timestamp} - ${message}`;
     console.log(logMessage);
-    logStream.write(logMessage + '\n');
-}
-
+});
+// Creation de la connexion à mariadb - createPool fait partie de mariadb
 const pool = mariadb.createPool({
-    host: process.env.DB_HOST, 
     user: process.env.DB_USER, 
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     connectionLimit: 5
 });
 
+// Creation de la connexion à sqlite3 - Database fait partie de sqlite3
 const db = new sqlite3.Database('./dbs/data.db', (err) => {
     if (err) {
         return log(err.message);
@@ -46,9 +44,7 @@ const db = new sqlite3.Database('./dbs/data.db', (err) => {
     db.run('CREATE TABLE IF NOT EXISTS user_data(name TEXT, timestamp INTEGER, ip TEXT)');
 });
 
-const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.get('/checkdb', async (req, res) => {
     let conn;
     try {
@@ -64,8 +60,6 @@ app.get('/checkdb', async (req, res) => {
         if (conn) conn.release();
     }
 });
-
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -80,21 +74,17 @@ app.get('/', (req, res) => {
     });
     res.send('Hello, CROC!');
 });
-
 app.get('/time', (req, res) => {
     res.send(new Date().toISOString());
 });
-
 app.get('/db_cri', (req, res) => {
     res.send(process.env.DB_CRI);
 });
-
 app.post('/submit', (req, res) => {
     const name = req.body.name;
     const timestamp = Date.now();
     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const userAgent = req.headers['user-agent'];
-
     db.run(`INSERT INTO user_data(name, timestamp, ip) VALUES(?, ?, ?)`, [name, timestamp, `${userIP} / ${userAgent}`], function(err) {
         if (err) {
             return log(err.message);
@@ -103,7 +93,6 @@ app.post('/submit', (req, res) => {
     });
     res.redirect(`/response_data?name=${encodeURIComponent(name)}`);
 });
-
 app.get('/response_data', async (req, res) => {
     let conn;
     try {
@@ -121,8 +110,6 @@ app.get('/response_data', async (req, res) => {
         if (conn) conn.release();
     }
 });
-
-
 app.listen(PORT, IP, () => {
     log(`Server running at http://${IP}:${PORT}/`);
 });

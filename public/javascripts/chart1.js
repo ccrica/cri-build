@@ -1,8 +1,9 @@
         const ctx = document.getElementById('myChart').getContext('2d');
-        const logoCtx = document.getElementById('myLogo').getContext('2d');
+//        let img;
         const myChart = new Chart(ctx, {
             type: 'polarArea',
             data: {
+                labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4', 'Label 5', 'Label 6'],
                 datasets: [{
                     label: '# of Votes',
                     data: [12, 19, 3, 5, 2, 3],
@@ -52,41 +53,91 @@
         }]
             },
             options: {
+
+                plugins: {
+                    afterDraw: (chart) => {
+                        var ctx = chart.ctx;
+                        chart.data.labels.forEach((label, index) => {
+                            var dataset = chart.data.datasets[0];
+                            var meta = chart.getDatasetMeta(0);
+                            var total = dataset.data.reduce((total, currentValue) => total + currentValue);
+                            var currentValue = dataset.data[index];
+                            var percentage = Math.floor(((currentValue/total) * 100)+0.5);
+            
+                            var model = meta.data[index]._model;
+                            var mid_radius = model.innerRadius + (model.outerRadius - model.innerRadius)/2;
+                            var start_angle = model.startAngle;
+                            var end_angle = model.endAngle;
+                            var mid_angle = start_angle + (end_angle - start_angle)/2;
+            
+                            var x = mid_radius * Math.cos(mid_angle);
+                            var y = mid_radius * Math.sin(mid_angle);
+            
+                            ctx.fillStyle = '#000';
+                            ctx.font = "1em Arial";
+                            ctx.fillText(label, model.x + x, model.y + y);
+                        });
+                    }
+                },
                 responsive: true,
                 scales: {
                     r: {
                         beginAtZero: true
                     }
+                },
+                animation: {
+                    onComplete: function() {
+                        drawLogo();
+                        console.log('1. Fonction logo appelée depuis le chart')
+                    }
                 }
             }
         });
+
+window.addEventListener('resize', function() {
+            const logo = document.getElementById('myLogo');
+            const aspectRatio = logo.naturalWidth / logo.naturalHeight;
+            logo.style.height = (logo.offsetWidth / aspectRatio) + 'px';
+            drawLogo();
+        });
+
         function drawLogo() {
+            console.log('2. Fonction logo appelée')
             const img = new Image();
             img.onload = function() {
-                // Calculate the center of the canvas
-                const centerX = logoCtx.canvas.width / 2;
-                const centerY = logoCtx.canvas.height / 2;
-                // Calculate the radius as half the width or height of the image, whichever is smaller
-                const radius = Math.min(img.width, img.height) / 2;
-                // Create a circular clipping path
-                logoCtx.beginPath();
-                logoCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-                logoCtx.clip();
-                // Draw the image in the center of the canvas
-                logoCtx.drawImage(img, centerX - img.width / 2, centerY - img.height / 2);
-                // Reset the clipping path
-                logoCtx.restore();
+                // Get the position and size of the chart
+                const chartX = myChart.chartArea.left;
+                const chartY = myChart.chartArea.top;
+                const chartWidth = myChart.chartArea.right - myChart.chartArea.left;
+                const chartHeight = myChart.chartArea.bottom - myChart.chartArea.top;
+                console.log('3. Chart position and size:', chartX, chartY, chartWidth, chartHeight); // Add this line
+                // Calculate the center of the chart
+                const centerX = chartX + chartWidth / 2;
+                const centerY = chartY + chartHeight / 2;
+                console.log('4. Chart center:', centerX, centerY); // Add this line
+                // Calculate the radius as a smaller fraction of the width or height of the chart
+                const radius = Math.min(chartWidth, chartHeight) / 20; // Change this to adjust the size of the logo
+                console.log('5. Radius:', radius); // Add this line
+                // Calculate the size of the image
+                const imgWidth = radius * 2;
+                const imgHeight = imgWidth * (img.naturalHeight / img.naturalWidth);
+                console.log('6. Image size:', imgWidth, imgHeight); // Add this line
+                // Draw the image on the canvas
+                ctx.drawImage(img, centerX - imgWidth / 2, centerY - imgHeight / 2, imgWidth, imgHeight);
             };
             img.onerror = function() {
-                console.log('Error loading image');
+                console.log('3 à 6. Error loading image');
             };
-            img.src = './images/logo.png';
-                console.log('Image loaded');
+            img.src = 'https://note.dumspiro.ch/images/logo_circle.svg'; // Change this to the path of your SVG file
+            console.log('3 à 6. Logo lu et chargé', img);
         }
 
-        console.log('Canvas context:', ctx);
+// Call drawLogo when the chart is first created
+drawLogo();
 
-        // Call the drawLogo function after the chart is drawn
-        //myChart.update();
-        console.log('Chart updated');
+// Also call drawLogo when the window is resized, to ensure the logo stays in the correct position
+window.addEventListener('resize', drawLogo);
+
+        console.log('7. Canvas context:', ctx);
+        console.log('8. Chart updated');
         setTimeout(drawLogo,100);

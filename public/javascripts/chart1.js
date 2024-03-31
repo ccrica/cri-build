@@ -1,12 +1,20 @@
-        const ctx = document.getElementById('myChart').getContext('2d');
+const chartDataObjRisk = {
+    labels: ['', 'Financier', '', '', 'Réputationnel', '', '', 'Légal', '', '', 'Mission/stratégique', '', '', 'Opérationnel', '', '', 'Physique/Santé', ''],
+    rObjectifs: [12, 19, 3, 5, 2, 3], //6 valeurs
+    rAtteints: [0,15,0,0, 30,0,0, 12,0,0, 13,0,0, 11,0,0, 12,0],
+    rTitres: [30] //devrait être le maximum + 5 pour des titres positionnés en dehors du chart
+};
+const ctx = document.getElementById('myChart').getContext('2d');
 //        let img;
+// Set a specific height for the canvas
+        document.getElementById('myChart').style.height = '500px';
         const myChart = new Chart(ctx, {
             type: 'polarArea',
             data: {
-                labels: ['Label 1', 'Label 2', 'Label 3', 'Label 4', 'Label 5', 'Label 6'],
+                labels: ['Financier  Réputationnel  Légal  Mission/stratégique  Opérationnel  Physique/Santé', '', '', '', '', '' ],
                 datasets: [{
-                    label: '# of Votes',
-                    data: [12, 19, 3, 5, 2, 3],
+                    //label: '# of Votes',
+                    data: chartDataObjRisk.rObjectifs,
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
@@ -23,11 +31,14 @@
                         'rgba(153, 102, 255, 1)',
                         'rgba(255, 159, 64, 1)'
                     ],
-                    borderWidth: 1
+                    datalabels:{
+                        display: false
+                    },
+                    hidden:false
+                    //,borderWidth: 1
                 },
-                {
-                    label: 'Zone pleine',
-                    data: [0,15,0,0, 30,0,0, 12,0,0, 13,0,0, 11,0,0, 12,0],
+                {   //label: 'Zone pleine',
+                    data: chartDataObjRisk.rAtteints,
                     backgroundColor: [
                         'rgba(0, 0, 0, 0)',    
                         'rgba(255, 99, 132, 1)',
@@ -48,41 +59,39 @@
                         'rgba(255, 159, 64, 1)',
                         'rgba(0, 0, 0, 0)'
                     ],
-                    borderWidth: 1,
+                    datalabels: {
+                        display: false
+                    },
+                    //borderWidth: 1,
                     hidden: false
-        }]
+        },{
+                        data: chartDataObjRisk.rTitres,
+            backgroundColor: [
+                'rgba(0, 0, 0,0)'
+                ],
+                datalabels: {
+                    display: true,
+                    color: 'green'
+                },
+            }]
             },
+            plugins: [ChartDataLabels],
             options: {
-
-                plugins: {
-                    afterDraw: (chart) => {
-                        var ctx = chart.ctx;
-                        chart.data.labels.forEach((label, index) => {
-                            var dataset = chart.data.datasets[0];
-                            var meta = chart.getDatasetMeta(0);
-                            var total = dataset.data.reduce((total, currentValue) => total + currentValue);
-                            var currentValue = dataset.data[index];
-                            var percentage = Math.floor(((currentValue/total) * 100)+0.5);
-            
-                            var model = meta.data[index]._model;
-                            var mid_radius = model.innerRadius + (model.outerRadius - model.innerRadius)/2;
-                            var start_angle = model.startAngle;
-                            var end_angle = model.endAngle;
-                            var mid_angle = start_angle + (end_angle - start_angle)/2;
-            
-                            var x = mid_radius * Math.cos(mid_angle);
-                            var y = mid_radius * Math.sin(mid_angle);
-            
-                            ctx.fillStyle = '#000';
-                            ctx.font = "1em Arial";
-                            ctx.fillText(label, model.x + x, model.y + y);
-                        });
+                datalabels: {
+                    display: true,
+                    align: 'end',
+                    anchor: 'end',
+                    color: '#666',
+                    formatter: function(_, context) {
+                        return context.chart.data.labels[context.dataIndex];
                     }
                 },
                 responsive: true,
                 scales: {
                     r: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        display: false
+
                     }
                 },
                 animation: {
@@ -102,7 +111,7 @@ window.addEventListener('resize', function() {
         });
 
         function drawLogo() {
-            console.log('2. Fonction logo appelée')
+            console.log('2. Fonction logo appelée');
             const img = new Image();
             img.onload = function() {
                 // Get the position and size of the chart
@@ -110,20 +119,22 @@ window.addEventListener('resize', function() {
                 const chartY = myChart.chartArea.top;
                 const chartWidth = myChart.chartArea.right - myChart.chartArea.left;
                 const chartHeight = myChart.chartArea.bottom - myChart.chartArea.top;
-                console.log('3. Chart position and size:', chartX, chartY, chartWidth, chartHeight); // Add this line
+
                 // Calculate the center of the chart
                 const centerX = chartX + chartWidth / 2;
                 const centerY = chartY + chartHeight / 2;
-                console.log('4. Chart center:', centerX, centerY); // Add this line
+
                 // Calculate the radius as a smaller fraction of the width or height of the chart
-                const radius = Math.min(chartWidth, chartHeight) / 20; // Change this to adjust the size of the logo
-                console.log('5. Radius:', radius); // Add this line
+                const radius = Math.min(chartWidth, chartHeight) / 20; 
+
                 // Calculate the size of the image
                 const imgWidth = radius * 2;
                 const imgHeight = imgWidth * (img.naturalHeight / img.naturalWidth);
-                console.log('6. Image size:', imgWidth, imgHeight); // Add this line
+
                 // Draw the image on the canvas
                 ctx.drawImage(img, centerX - imgWidth / 2, centerY - imgHeight / 2, imgWidth, imgHeight);
+
+                ctx.restore();
             };
             img.onerror = function() {
                 console.log('3 à 6. Error loading image');

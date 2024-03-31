@@ -14,8 +14,8 @@ const config = {
 //                backgroundColor: [cVide, legendLabelColors[0], cVide, legendLabelColors[1],cVide,  legendLabelColors[2],cVide,  legendLabelColors[3],cVide, legendLabelColors[4],cVide, legendLabelColors[5]],
                 data: [0, 80,0, 0, 40,0, 0, 54,0, 0, 62,0, 0, 71,0, 0, 45,0],
                 backgroundColor: [cVide, legendLabelColors[0],cVide, cVide, legendLabelColors[1],cVide, cVide, legendLabelColors[2],cVide, cVide, legendLabelColors[3],cVide, cVide,legendLabelColors[4],cVide, cVide, legendLabelColors[5], cVide],
-
                 datalabels: {
+                  // valeur effective du domaine, démontrée en pourcent
                    formatter: (value, context) => value + '%',
                    color: "#ffffff"
                 },

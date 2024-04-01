@@ -1,7 +1,7 @@
 window.onload = function() {
             showTimes();
             fetchDbCri();
-            fetchData();
+            fetchSessionKeyDetails();
         }
 
         function showTimes() {
@@ -13,6 +13,7 @@ window.onload = function() {
                     document.getElementById('serverTime').textContent = serverTime;
                     const diff = new Date(serverTime).getTime() - userTime.getTime();
                     document.getElementById('diff').textContent = diff + ' milliseconds';
+                    console.log("fait!");
                 });
         }
 
@@ -24,10 +25,18 @@ window.onload = function() {
                 });
         }
 
-        function fetchData() {
-            fetch('/sessionKey')
-                .then(response => response.text())
-                .then(sessionKey => {
-                    console.log('Session Key:', sessionKey);
+        function fetchSessionKeyDetails() {
+            fetch('/sessionKeyDetails')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`ça fonctionne pas : ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(sessionKeyDetails => {
+                    document.getElementById('sessionKeyDetails').textContent = sessionKeyDetails.result;
+                })
+                .catch(error => {
+                    console.log('Fetch error: ', error);
                 });
         }

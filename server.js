@@ -10,12 +10,14 @@ import mariadb from 'mariadb';
 import bodyParser from 'body-parser';
 import path from 'path';
 import https from 'https';
+import fetch from 'node-fetch';
+// __dirname n'étant plus d'actualité dane le code moderne ??
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
 
 /**
  * initialisation des variables d'environnement + Express + IP et Port
@@ -24,14 +26,13 @@ const result = dotenv.config({ path: '/var_env/ls/.env' });
     if (result.error) {throw result.error;}
 const app = express();
 const PORT = process.env.PORT;
-const IP = process.env.IP;
-
-
+const IP = process.env.HOST;
 /**
  * utilisation de scripts en dehors du répertoire public et logguer certaines actions
  */
 app.use('/js', express.static(path.join(__dirname, './scripts')));
 const logStream = fs.createWriteStream('./logs/server.log', { flags: 'a' });
+
 /**
 Enregistre certains logs dans la base locale
 But ici à l'avenir : pouvoir travailler avec des datas locales ou sur le serveur
@@ -41,40 +42,28 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     next();
   });
-app.get('/sessionKey', (req, res) => {
-    const https = require("https");
+
+app.get('/sessionKeyDetails', (req, res) => {
+    const url = 'https://ls.dumspiro.ch/index.php?r=admin/remotecontrol';
     const options = {
-        "method": "POST",
-        "hostname": "zyw.dumspiro.ch",
-        "port": null,
-        "path": "/index.php?r=admin%2Fremotecontrol",
-        "headers": {
-            "cookie": "LS-FDLAPYAUETXKQQZE=2d2f36c6284ffb20aca8fc9654117c11",
-            "Content-Type": "application/json",
-            "Content-Length": "88"
-        }
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': '88'
+        },
+        body: JSON.stringify({method: 'get_session_key', params: [process.env.LS_API_USER, process.env.LS_API_PWD], id: 1})
     };
 
-    const request = https.request(options, function (response) {
-        const chunks = [];
-
-        response.on("data", function (chunk) {
-            chunks.push(chunk);
+    fetch(url, options)
+        .then(response => response.text())
+        .then(body => {
+            console.log('Response from ls.dumspiro.ch:', body);
+            res.send(body);
+        })
+        .catch(error => {
+            console.error('Problem with request:', error.message);
+            res.status(500).send(error.message);
         });
-
-        response.on("end", function () {
-            const body = Buffer.concat(chunks);
-            console.log('Response from ls.dumspiro.ch:', body.toString()); // Log the response body
-            res.send(body.toString());
-        });
-    });
-
-    request.on('error', function(e) {
-        console.error('Problem with request:', e.message); // Log any errors with the request
-    });
-
-    request.write(JSON.stringify({method: 'get_session_key', params: ['dum_eed3', 'rkqw3gQu4P64'], id: 1}));
-    request.end();
 });
 
 function log(message) {
@@ -90,6 +79,8 @@ const pool = mariadb.createPool({
     database: process.env.DB_NAME,
     connectionLimit: 5
 });
+
+console.log(pool);
 
 // Creation de la connexion à sqlite3 - Database fait partie de sqlite3
 const db = new sqlite3.Database('./dbs/data.db', (err) => {

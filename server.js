@@ -2,6 +2,7 @@
  * CRI - 2024
  * Import des des modules utilisés par nodejs pour la partie serveur
  */
+import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'fs';
 import sqlite3 from 'sqlite3';
@@ -9,16 +10,23 @@ import mariadb from 'mariadb';
 import bodyParser from 'body-parser';
 import path from 'path';
 import https from 'https';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 
 /**
  * initialisation des variables d'environnement + Express + IP et Port
  */
-const result = dotenv.config({ path: '/var_env/ls/.env.txt' });
+const result = dotenv.config({ path: '/var_env/ls/.env' });
     if (result.error) {throw result.error;}
 const app = express();
 const PORT = process.env.PORT;
 const IP = process.env.IP;
+
+
 /**
  * utilisation de scripts en dehors du répertoire public et logguer certaines actions
  */

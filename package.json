@@ -1,8 +1,9 @@
 {
-  "name": "node-cri",
+  "name": "node-cyberm",
   "version": "1.0.1",
   "description": "CRI - essai février 2024",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "chart.js": "^4.4.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

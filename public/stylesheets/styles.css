@@ -1,6 +1,14 @@
-.container {
+.container-visible {
     display: flex;
     flex-wrap: wrap;
+}
+
+.container-hidden {
+    display: none;
+}
+
+.container-visible {
+    display: flex;
 }
 
 .column {

@@ -1,5 +1,5 @@
 const chartDataObj = {
-    labels: [{'txt1','txt2', 'txt3', 'txt4', 'txt5', 'txt6'},{'tat1b','tat2b', 'tat3b', 'tat4b', 'tat5b', 'tat6b'},{'tbt1c','tbt2c', 'tbt3c', 'tbt4c', 'tbt5c', 'tbt6c'}],
+    labels: [['txt1','txt2', 'txt3', 'txt4', 'txt5', 'txt6'],['tat1b','tat2b', 'tat3b', 'tat4b', 'tat5b', 'tat6b'],['tbt1c','tbt2c', 'tbt3c', 'tbt4c', 'tbt5c', 'tbt6c']],
     personalData: [32, 57],
     orgData: [18, 42],
     title: [110,110,110,110,110,110]
@@ -10,7 +10,6 @@ const chartData = {
     datasets: [{
         label: 'Title',
         data: chartDataObj.title,
-        labels: 
         fill: true,
         backgroundColor: 'rgba(255, 99, 132, 0.2)', // Light pink fill
         borderColor: 'rgb(255, 99, 132)', // Pink border
@@ -42,7 +41,6 @@ const chartData = {
         pointHoverBorderColor: 'rgb(54, 162, 235)'
     }]
 };
-
 const options = {
     elements: {
         line: {
@@ -99,13 +97,13 @@ const options = {
     maintainAspectRatio: true,
 };
 
-const config = {
+const config2 = {
     type: 'polarArea',
     data: chartData,
     options: options
 };
 
 const myRadarChart = new Chart(
-    document.getElementById('myRadarChart'),
-    config
+    document.getElementById('chartRisk2'),
+    config2
 );

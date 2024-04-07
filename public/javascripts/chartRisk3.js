@@ -4,10 +4,9 @@ const chartDataObjRisk = {
     rAtteints: [0,15,0,0, 30,0,0, 12,0,0, 13,0,0, 11,0,0, 12,0],
     rTitres: [30] //devrait être le maximum + 5 pour des titres positionnés en dehors du chart
 };
-const ctx = document.getElementById('myChart').getContext('2d');
-//        let img;
-// Set a specific height for the canvas
-        document.getElementById('myChart').style.height = '500px';
+const ctx = document.getElementById('chartRisk3').getContext('2d');
+
+//        document.getElementById('chartRisk3').style.height = '500px';
         const myChart = new Chart(ctx, {
             type: 'polarArea',
             data: {
@@ -97,7 +96,7 @@ const ctx = document.getElementById('myChart').getContext('2d');
                 animation: {
                     onComplete: function() {
                         drawLogo();
-                        console.log('1. Fonction logo appelée depuis le chart')
+                        console.log('1. Fonction logo appelée depuis le graphique version 1')
                     }
                 }
             }

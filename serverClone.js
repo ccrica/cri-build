@@ -39,10 +39,7 @@ app.get('/env', (req, res) => {
     });
 });
 
-app.get('/tokenex', (req, res) => {
-    res.json({ TOKENEX: process.env.TOKENEX });
-});
-
+app.listen(3000, () => console.log('Server listening on port 3000'));
 /**
  * utilisation de scripts en dehors du répertoire public et logguer certaines actions
  */
@@ -55,10 +52,10 @@ But ici à l'avenir : pouvoir travailler avec des datas locales ou sur le serveu
  */
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/njs', express.static('/app'));
-// app.use(function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     next();
-//   });
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    next();
+  });
 
 app.get('/sessionKeyDetails', (req, res) => {
     const url = 'https://ls.dumspiro.ch/index.php?r=admin/remotecontrol';
@@ -179,6 +176,13 @@ app.get('/response_data', async (req, res) => {
     }
     
 });
+
+app.post('/newSubmit', function(req, res) {
+    const newName = req.body.newName;
+    console.log('Received new name:', newName);
+    res.sendStatus(200);
+});
+
 
 
 app.listen(PORT, IP, () => {

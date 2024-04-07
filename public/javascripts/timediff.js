@@ -1,7 +1,6 @@
 window.onload = function() {
             showTimes();
             fetchDbCri();
-            fetchSessionKeyDetails();
         }
 
         function showTimes() {
@@ -25,18 +24,3 @@ window.onload = function() {
                 });
         }
 
-        function fetchSessionKeyDetails() {
-            fetch('/sessionKeyDetails')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`ça fonctionne pas : ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(sessionKeyDetails => {
-                    document.getElementById('sessionKeyDetails').textContent = sessionKeyDetails.result;
-                })
-                .catch(error => {
-                    console.log('Fetch error: ', error);
-                });
-        }

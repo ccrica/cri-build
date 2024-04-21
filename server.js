@@ -39,9 +39,12 @@ app.get('/env', (req, res) => {
     });
 });
 
+
+
 app.get('/tokenex', (req, res) => {
     res.json({ TOKENEX: process.env.TOKENEX });
 });
+
 
 /**
  * utilisation de scripts en dehors du répertoire public et logguer certaines actions
@@ -54,7 +57,7 @@ Enregistre certains logs dans la base locale
 But ici à l'avenir : pouvoir travailler avec des datas locales ou sur le serveur
  */
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/njs', express.static('/app'));
+//app.use('/njs', express.static('/app'));
 // app.use(function(req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");
 //     next();
@@ -167,11 +170,20 @@ app.get('/response_data', async (req, res) => {
         const name = req.query.name;
         conn = await pool.getConnection();
 
-        // Read the SQL query from the tk-ml.sql file
-        const sqlQuery = fs.readFileSync('sql/tk-ml.sql', 'utf8');
-
-        const rows = await conn.query(sqlQuery, [name]);
-        res.send(rows);
+        //Read the SQL query from the tk-ml.sql file
+        const sqlQuery = fs.readFileSync('sql/tk-ml_perso.sql', 'utf8');
+        const perso = await conn.query(sqlQuery, [name]);
+        // valeurs par défaut pour la typologie choisie en lien avec le token pour le chart1
+        const sqlQuery2 = fs.readFileSync('sql/tk-ml_prio.sql', 'utf8');
+        const prio = await conn.query(sqlQuery2, [name]);
+        // domaines selon la langue choisie
+        const sqlQuery3 = fs.readFileSync('sql/tk-ml_labels.sql', 'utf8');
+        const labels = await conn.query(sqlQuery3, [name]);
+        const sqlQuery4 = fs.readFileSync('sql/tk-ml_data.sql', 'utf8');
+        const data = await conn.query(sqlQuery4, [name]);
+        res.send({perso: perso, prio: prio, labels: labels, data: data});
+        // ligne pour tester une requête seule
+        //res.send(data);
     } catch (err) {
         log('Error occurred while selecting from MariaDB: ' + err);
     } finally {

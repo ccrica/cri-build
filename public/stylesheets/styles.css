@@ -12,12 +12,16 @@
 }
 
 .column {
-    flex: 1 0 33.33%;
-    max-width: 33.33%;
+    flex: 1 0 65%; /* For the first column */
+    max-width: 65%;
     box-sizing: border-box; /* Include padding and border in the element's total width */
     border: 0.5px solid green;
 }
 
+.column:nth-child(2) {
+    flex: 1 0 35%; /* For the second column */
+    max-width: 35%;
+}
 
 #myChart {
     position: relative;

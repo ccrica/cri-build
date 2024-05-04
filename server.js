@@ -5,12 +5,12 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'fs';
-import sqlite3 from 'sqlite3';
+//import sqlite3 from 'sqlite3';
 import mariadb from 'mariadb';
 import bodyParser from 'body-parser';
 import path from 'path';
-import https from 'https';
-import fetch from 'node-fetch';
+//import https from 'https';
+//import fetch from 'node-fetch';
 // __dirname n'étant plus d'actualité dane le code moderne ??
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -28,19 +28,11 @@ const app = express();
 const PORT = process.env.PORT;
 const IP = process.env.HOST;
 
-
 dotenv.config({ path: '/var_env/ls/.env' });
 
 
-app.get('/env', (req, res) => {
-    res.json({
-        LS_API_USER: process.env.LS_API_USER,
-        LS_API_PWD: process.env.LS_API_PWD
-    });
-});
 
-
-
+// a remplacer par token exemple dès que possible
 app.get('/tokenex', (req, res) => {
     res.json({ TOKENEX: process.env.TOKENEX });
 });
@@ -57,34 +49,6 @@ Enregistre certains logs dans la base locale
 But ici à l'avenir : pouvoir travailler avec des datas locales ou sur le serveur
  */
 app.use(express.static(path.join(__dirname, 'public')));
-//app.use('/njs', express.static('/app'));
-// app.use(function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     next();
-//   });
-
-app.get('/sessionKeyDetails', (req, res) => {
-    const url = 'https://ls.dumspiro.ch/index.php?r=admin/remotecontrol';
-    const options = {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': '88'
-        },
-        body: JSON.stringify({method: 'get_session_key', params: [process.env.LS_API_USER, process.env.LS_API_PWD], id: 1})
-    };
-
-    fetch(url, options)
-        .then(response => response.text())
-        .then(body => {
-            console.log('Response from ls.dumspiro.ch:', body);
-            res.send(body);
-        })
-        .catch(error => {
-            console.error('Problem with request:', error.message);
-            res.status(500).send(error.message);
-        });
-});
 
 function log(message) {
     const timestamp = new Date().toISOString();
@@ -102,15 +66,6 @@ const pool = mariadb.createPool({
 });
 
 console.log(pool);
-
-// Creation de la connexion à sqlite3 - Database fait partie de sqlite3
-const db = new sqlite3.Database('./dbs/data.db', (err) => {
-    if (err) {
-        return log(err.message);
-    }
-    log('Connected to the SQlite database.');
-    db.run('CREATE TABLE IF NOT EXISTS user_data(name TEXT, timestamp INTEGER, ip TEXT)');
-});
 
 app.get('/checkdb', async (req, res) => {
     let conn;
@@ -130,18 +85,6 @@ app.get('/checkdb', async (req, res) => {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Requête base locale sqlite3
-app.get('/', (req, res) => {
-    db.all('SELECT * FROM user_data', [], (err, rows) => {
-        if (err) {
-            throw err;
-        }
-        rows.forEach((row) => {
-            log(row.name + "\t" + row.timestamp + "\t" + row.ip);
-        });
-    });
-    res.send('Hello, CROC!');
-});
 // Heure du serveur (pour les pb de 2FA)
 app.get('/time', (req, res) => {
     res.send(new Date().toISOString());
@@ -150,38 +93,63 @@ app.get('/time', (req, res) => {
 app.get('/db_cri', (req, res) => {
     res.send(process.env.DB_CRI);
 });
+// app.get('/submit', (req, res) => {
+//     const tkID = req.query.tkID;
+//     const timestamp = Date.now();
+//     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+//     const userAgent = req.headers['user-agent'];
+
+//     // Check if tkID is a 15-character string with no spaces
+//     if (!/^[\S]{15}$/.test(tkID)) {
+//         return res.status(400).send('Invalid tkID');
+//     }
+
+//     res.redirect(`/response_data?tkID=${encodeURIComponent(tkID)}`);
+// });
+
 app.post('/submit', (req, res) => {
-    const name = req.body.name;
+    const tkID = req.body.tkID;
     const timestamp = Date.now();
     const userIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     const userAgent = req.headers['user-agent'];
-    // Alimente la base locale sqlite3 avec des données
-    db.run(`INSERT INTO user_data(name, timestamp, ip) VALUES(?, ?, ?)`, [name, timestamp, `${userIP} / ${userAgent}`], function(err) {
-        if (err) {
-            return log(err.message);
-        }
-        log(`A row has been inserted with rowid ${this.lastID}`);
-    });
-    res.redirect(`/response_data?name=${encodeURIComponent(name)}`);
+
+    // Check if tkID is a 15-character string with no spaces
+    if (!/^[\S]{15}$/.test(tkID)) {
+        return res.status(400).send('Invalid tkID');
+    }
+    res.redirect(`/response_data?tkID=${encodeURIComponent(tkID)}`);
 });
+
 app.get('/response_data', async (req, res) => {
     let conn;
     try {
-        const name = req.query.name;
+        const tkID = req.query.tkID;
         conn = await pool.getConnection();
 
         //Read the SQL query from the tk-ml.sql file
-        const sqlQuery = fs.readFileSync('sql/tk-ml_perso.sql', 'utf8');
-        const perso = await conn.query(sqlQuery, [name]);
+        const sqlQ1 = fs.readFileSync('sql/tk-ml_perso.sql', 'utf8');
+        const perso = await conn.query(sqlQ1, [tkID]);
+        const lang = perso[0].startlanguage; 
         // valeurs par défaut pour la typologie choisie en lien avec le token pour le chart1
-        const sqlQuery2 = fs.readFileSync('sql/tk-ml_prio.sql', 'utf8');
-        const prio = await conn.query(sqlQuery2, [name]);
+        const sqlQ2 = fs.readFileSync('sql/tk-ml_prio.sql', 'utf8');
+        const prio = await conn.query(sqlQ2, [tkID]);
         // domaines selon la langue choisie
-        const sqlQuery3 = fs.readFileSync('sql/tk-ml_labels.sql', 'utf8');
-        const labels = await conn.query(sqlQuery3, [name]);
-        const sqlQuery4 = fs.readFileSync('sql/tk-ml_data.sql', 'utf8');
-        const data = await conn.query(sqlQuery4, [name]);
-        res.send({perso: perso, prio: prio, labels: labels, data: data});
+        const sqlQ3 = fs.readFileSync('sql/tk-ml_labels.sql', 'utf8');
+        const labels = await conn.query(sqlQ3, [tkID]);
+        const sqlQ4 = fs.readFileSync('sql/tk-ml_data.sql', 'utf8');
+        const data = await conn.query(sqlQ4, [tkID]);
+        const sqlQ5 = fs.readFileSync('sql/tk-ml_dataDom.sql', 'utf8');
+        const dataDom = await conn.query(sqlQ5, [tkID]);
+        const sqlQ6 = fs.readFileSync('sql/tk-ml_titres.sql', 'utf8');
+        const dataTitres = await conn.query(sqlQ6, [tkID]);
+        const sqlQ7 = fs.readFileSync('sql/tk-ml_valeurs.sql', 'utf8');
+        const calcVal = await conn.query(sqlQ7, [tkID]);
+        const sqlQ8 = fs.readFileSync('sql/tk-ml_repses.sql', 'utf8');
+        const repses = await conn.query(sqlQ8, [tkID]);
+        const sqlQ9 = `SELECT CodeTxt, Chap1, Chap2, Logique, Physique, ${lang} as lang FROM lime_cyberm_txt;`;
+        const txtlangue = await conn.query(sqlQ9);
+        res.send({perso: perso, prio: prio, labels: labels, data: data, dataDom: dataDom, dataTitres: dataTitres, calcVal: calcVal, repses: repses, txtlangue: txtlangue});
+
         // ligne pour tester une requête seule
         //res.send(data);
     } catch (err) {

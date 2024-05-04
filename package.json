@@ -21,6 +21,7 @@
     "mariadb": "^3.3.0",
     "node-fetch": "^3.3.2",
     "pem": "^1.14.8",
+    "pivottable": "^2.23.0",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {

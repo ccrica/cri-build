@@ -9,38 +9,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://unpkg.com/chart.js-plugin-labels-dv/dist/chartjs-plugin-labels.min.js"></script>
+    <link href="https://cdn.webdatarocks.com/latest/webdatarocks.min.css" rel="stylesheet"/>
+    <script src="https://cdn.webdatarocks.com/latest/webdatarocks.toolbar.min.js"></script>
+    <script src="https://cdn.webdatarocks.com/latest/webdatarocks.js"></script>
     <!--script src="./javascripts/chartRisk1.js" type="module"></script-->
     <script src="./javascripts/data.js"></script>
 </head>
 <body>
     <h1 id="db_cri"></h1>
     <form id="submitForm" action="/submit" method="post">
-        <label for="name">Token :</label>
-        <input type="text" id="name" name="name">
+        <label for="tkID">Token :</label>
+        <input type="text" id="tkID" name="tkID">
         <input type="submit" value="Submit">
     </form>
     <div id="dbData"></div>
     <p id="responseReceived"></p>
     <p id="downloadLinkContainer"></p>
+    <p id="RepsesVal"></p>
 </form>
 
-
-<!--script src="./javascripts/chartRisk2.js"></script-->
-<!--script src="./javascripts/chartRisk3.js"></script-->
 <div class="container container-hidden">
+
     <div class="column">
-        <h1>Ciao Belli !</h1>
-    </div>
-    <div class="column">
-    <h1>Great deal !</h1>
+    <h1 id="titrePivot" style="text-align: center;"></h1>
+    <div id="pivotTable"></div>
             <!--canvas id="chartRisk2"></canvas-->
     </div>
     <div class="column">
-    <h1>Belle semaine</h1>
+    <h1 id="titreGraph1" style="text-align: center;"></h1>
             <canvas id="chartRisk1"></canvas>
             <!--canvas id="chartRisk3"></canvas-->
     </div>
 </div>
+
+<!--p id="Tabs2"></p-->
+
 
 </body>
 </html>
